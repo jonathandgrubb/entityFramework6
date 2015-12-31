@@ -1,0 +1,105 @@
+1) Introduction:
+EF is an ORM (Object Relational Mapper)
+EF doesn't force you into having your domain classes be exactly like your db
+open source
+use LINQ
+DB-first or code-first (can migrate db)
+Classes <-> EF's DbContext API <-> Relational DB
+
+2) Creating a code based model and a database:
+Ninja.Module2Demo
+- add a project with classes to represent a Ninja data model 
+  (NinjaDomain.Classes)
+    . Classes:
+        Ninja
+            Clan
+            NinjaEquipment
+- and another project to enable interraction with the DB with EF 
+  (NinjaDomain.DataModel)
+    . add EF to this project with nuget 
+      (command line: PM> install-package entityframework)
+      it will create an app.config pointing to LocalDB
+    . Classes:
+        NinjaContext (inherits from DbContext)
+            DbSet<> - maintains the collection of Entities for Linq queries
+- View the EF models that will be created
+    - add EF Power Tools to VS 2015 
+      (http://thedatafarm.com/data-access/installing-ef-power-tools-into-vs2015/)
+    - make NinjaDomain.DataMOdel the StartUp project
+    - Right-Click NinjaContext.cs > EntityFramework 
+                                  > View Entity Data Model (Read-only)
+        - 1-to-many for Clan to Ninjas
+        - 0..1-to-many for Ninja to NinjaEquipment (we wanted 1-to-many)
+          (two ways to solve it)
+          1) decorate NinjaEquipment.Ninja with [Required]
+          2) configure mappings with EF's "Fluent API" in DbContext class 
+             (NinjaDomain.DataModel)
+
+- Database migration
+    - Change the models
+    - regenerate the NinjaContext
+
+    1) Enable Migrations (PM> enable-migrations)
+    2) Let Migrations create a database (PM> add-migration Initial)
+    3) Let Migrations change the database (PM> update-database -verbose)
+
+    Code First Database Migrations
+    - Define/change Model
+    - Create a Migration File
+    - Apply Migration to Database
+
+
+3) Interract with Data
+        
+        (see ConsoleApplication)
+        Insert simple objects
+            note: for an AddRange() each row is inserted one at a time...
+        
+        query simple objects
+            can use LINQ Methods 
+                    .Where(n=>n.Name=="Raphel")
+                    .ToList()
+            or LINQ Query Syntax
+                    (FROM ninja IN context.Ninjas
+                     WHERE ninja.Name =="Raphel")
+                    .ToList()
+            enumerating the object will execute the query. if done like this:
+            foreach (var ninja in context.Ninjas)...
+            it will hold the db connection open the entire time the loop is going
+                FirstOrDefault(), ToList() enumerates
+        
+        updating simple objects
+            QueryAndUpdateNinja()
+            QueryAndUpdateNinjaDisconnected()
+
+        getting data with find and SqlQuery
+            context.Ninjas.Find(4); // looks for ninja.Id==4
+            context.Ninjas.SqlQuery("exec GetOldNinjas"); 
+                                    // stored proc results 
+                                    // need to align with the Ninja type properties
+                                    // (also needs enumerated to run)
+
+        Deleting objects
+            DeleteNinja() --- context.Ninjas.Remove(ninja);
+            DeleteNinjaDisconnected() --- when you have to delete it from a new context
+            DeleteNinjaWithKeyValue() --- remove with Find (without using EntityState.Deleted)
+            you can delete with one step by using SqlQuery to execute a stored proc
+
+        working with graphs of related data (all of the related objects)
+            InsertNinjawithEquipment()
+
+        projection queries
+            QueryNinjaWithEquipment()  --- eager loading --- 
+                    DbSet.Include() (join all results)
+            QueryNinjaWithEquipment2() --- explicit loading --- 
+                    (just join a few entries of the entire set)
+            QueryNinjaWithEquipment3() --- lazy loading 
+                    (author is not a fan because devs don't use it correctly) --- (data loaded when it is referred to... requires making the property virtual in the class)
+
+            not retrieving all of an object from the db
+            var ninjas = context.Ninjas
+                    .Select(n => new { n.Name, n.DateOfBirth, n.EquipmentOwned })
+                    .toList();
+            beware that this returns an Anonymous Type
+
+            
