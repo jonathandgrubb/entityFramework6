@@ -1,0 +1,1 @@
+C:\Users\jgrubb\Documents\GitHub\entityFramework6\Ninja.Module2Demo\ConsoleApplication\bin\Debug\ConsoleApplication.exe.config

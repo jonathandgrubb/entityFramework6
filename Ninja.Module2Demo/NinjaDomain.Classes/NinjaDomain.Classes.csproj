@@ -45,6 +45,7 @@
     <Compile Include="Classes.cs" />
     <Compile Include="Enums\EquipmentType.cs" />
     <Compile Include="Enums\NinjaType.cs" />
+    <Compile Include="Interfaces\IModificationHistory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

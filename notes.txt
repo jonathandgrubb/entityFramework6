@@ -102,4 +102,28 @@ Ninja.Module2Demo
                     .toList();
             beware that this returns an Anonymous Type
 
-            
+
+4) Using EF in applications
+    
+    in the class inherited by DbContext you can override 
+        OnModelCreating() - to restrict what is actually put in the models
+        SaveChanges() - to do something every time changes are saved (date created/date modified)
+
+    Connected Repository: WPF application you can write it to assume a persistant db connection
+        reposittory
+        NinjaContext context = new NinjaContext();
+    
+    Disconnected Repository: ASP.NET application you cannot
+        repository class
+        using (var context = new NinjaContext())
+        {
+            ...
+        }
+
+        AsNoTracking() <---- can provide a performance boost if you don't need the tracking information
+
+        ** FOREIGN KEY PROPERTIES MAKE WORKING IN DISCONNECTED APPLICATIONS MUCH EASIER **
+
+        You can use the disconnected repository for making a WebAPI
+
+
